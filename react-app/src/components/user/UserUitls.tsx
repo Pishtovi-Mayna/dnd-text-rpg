@@ -7,6 +7,10 @@ type PasswordProps = {
 	handleClick?: () => void;
 };
 
+type SubmitButtonProps = {
+	label: string;
+};
+
 export function UsernameField() {
 	return (
 		<TextField id='username' label='Username' variant='filled' fullWidth />
@@ -14,7 +18,6 @@ export function UsernameField() {
 }
 
 export function PasswordField(props: PasswordProps) {
-
 	return (
 		<TextField
 			id='username'
@@ -25,7 +28,11 @@ export function PasswordField(props: PasswordProps) {
 				endAdornment: (
 					<InputAdornment position='end'>
 						<IconButton onClick={props.handleClick}>
-							{props.showPassword ? <Visibility /> : <VisibilityOff />}
+							{props.showPassword ? (
+								<Visibility />
+							) : (
+								<VisibilityOff />
+							)}
 						</IconButton>
 					</InputAdornment>
 				),
@@ -34,10 +41,10 @@ export function PasswordField(props: PasswordProps) {
 	);
 }
 
-export function SubmitButton() {
+export function SubmitButton(props: SubmitButtonProps) {
 	return (
 		<Button type='submit' variant='contained' sx={{ height: '48px' }}>
-			Log in
+			{props.label}
 		</Button>
 	);
 }

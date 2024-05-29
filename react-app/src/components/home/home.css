@@ -3,7 +3,32 @@
     background-attachment: fixed;
     background-position: center;
     background-size: cover;
-    padding: 16rem;
+    padding: 8rem;
     margin: 0;
     max-width: 100%;
+}
+
+main {
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-action {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-right: 4em;
+}
+
+.text-greeting {
+    display: flex;
+    width: 100%;
+    justify-content: center; 
+    padding-right: 4em;
+    padding-bottom: 2em;
+    align-items: center;
 }

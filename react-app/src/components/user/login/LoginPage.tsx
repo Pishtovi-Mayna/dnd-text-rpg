@@ -22,7 +22,7 @@ export function Login() {
 					handleClick={() => setShowPassword(!showPassword)}
 					label='Password'
 				/>
-				<SubmitButton />
+				<SubmitButton label='Login' />
 			</Stack>
 		</div>
 	);

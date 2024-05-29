@@ -19,7 +19,7 @@ export function Register() {
 				<UsernameField />
 				<PasswordField showPassword={showPassword} handleClick={() => setShowPassword(!showPassword)} label='Password' />
 				<PasswordField showPassword={showPassword} handleClick={() => setShowPassword(!showPassword)} label='Confirm Password' />
-				<SubmitButton />
+				<SubmitButton label='Register' />
 			</Stack>
 		</div>
 	);
