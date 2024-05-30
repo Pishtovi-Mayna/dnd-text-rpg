@@ -1,0 +1,14 @@
+.characteristic {
+    background-color: lightgray;
+    border-bottom: 1px solid gray;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 0.5em;
+}
+
+.characteristics {
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+    border-right: 1px solid gray;
+    margin-top: 1em;
+}
