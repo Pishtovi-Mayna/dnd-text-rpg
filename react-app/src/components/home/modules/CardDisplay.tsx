@@ -12,14 +12,15 @@ import {
 type CardProps = {
 	title: string;
 	image: string;
+	type?: 'campaign' | 'character';
 };
 
 type CardListProps = {
-	type: string;
+	type: 'campaign' | 'character';
 	items: Array<CardProps>;
 };
 
-function Card({ title, image }: CardProps) {
+function Card({ title, image, type }: CardProps) {
 	return (
 		<MuiCard
 			sx={{
@@ -41,8 +42,12 @@ function Card({ title, image }: CardProps) {
 				/>
 			</CardContent>
 			<CardActions>
-				<Button size='small'>Join</Button>
-				<Button size='small'>Leave</Button>
+				<Button size='small'>
+					{type === 'campaign' ? 'Join' : 'Create'}
+				</Button>
+				<Button size='small'>
+					{type === 'campaign' ? 'Leave' : 'Delete'}
+				</Button>
 			</CardActions>
 		</MuiCard>
 	);
@@ -72,7 +77,7 @@ export function CardList({ items, type }: CardListProps) {
 				}}
 			>
 				{items.map(({ title, image }) => {
-					return <Card title={title} image={image} />;
+					return <Card title={title} image={image} type={type} />;
 				})}
 			</List>
 		</>
