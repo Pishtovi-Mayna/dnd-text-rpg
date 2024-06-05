@@ -31,7 +31,7 @@ function App() {
       /> */}
       {/* <TextBox /> */}
       {/* <CampaignCard title='Wassup' image='not found' /> */}
-      <CardList items={[
+      <CardList type='campaign' items={[
         {
           title: 'A title',
           image: Image

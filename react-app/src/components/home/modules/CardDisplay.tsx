@@ -15,6 +15,7 @@ type CardProps = {
 };
 
 type CardListProps = {
+	type: string;
 	items: Array<CardProps>;
 };
 
@@ -47,7 +48,7 @@ function Card({ title, image }: CardProps) {
 	);
 }
 
-export function CardList({ items }: CardListProps) {
+export function CardList({ items, type }: CardListProps) {
 	return (
 		<>
 			<Stack direction='row' justifyContent='space-between'>
@@ -55,8 +56,12 @@ export function CardList({ items }: CardListProps) {
 					Ongoing Campaigns
 				</Typography>
 				<Stack direction='row' spacing={2}>
-					<Button variant='outlined' endIcon={<Add />}>Create campaign</Button>
-					<Button variant='contained' endIcon={<ArrowRight />}>Join campaign</Button>
+					<Button variant='outlined' endIcon={<Add />}>
+						Create {type}
+					</Button>
+					<Button variant='contained' endIcon={<ArrowRight />}>
+						Join {type}
+					</Button>
 				</Stack>
 			</Stack>
 			<List
