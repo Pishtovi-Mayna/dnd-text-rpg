@@ -1,6 +1,14 @@
-import { NorthEast, Send } from '@mui/icons-material';
-import { IconButton, Stack, TextField, Typography } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import { NorthEast } from '@mui/icons-material';
+import {
+	Container,
+	IconButton,
+	Paper,
+	Stack,
+	TextField,
+	Typography,
+} from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
+import './text-box.css';
 
 interface Action {
 	id: number;
@@ -8,18 +16,18 @@ interface Action {
 	type: 'message' | 'action';
 }
 
-type ActionProp = {
+type ActionProps = {
 	action: Action;
 };
 
-const ActionBox = ({ action }: ActionProp) => {
+const ActionBox = ({ action }: ActionProps) => {
 	const fontWeightMap = new Map([
 		['message', '400'],
 		['action', '600'],
 	]);
 
 	return (
-		<Typography fontWeight={fontWeightMap.get(action.type)}>
+		<Typography fontWeight={fontWeightMap.get(action.type)} sx={{ wordWrap: 'break-word'}}>
 			{action.text}
 		</Typography>
 	);
@@ -28,6 +36,13 @@ const ActionBox = ({ action }: ActionProp) => {
 export function TextBox() {
 	const [actions, setActions] = useState<Array<Action>>([]);
 	const textFieldRef = useRef<HTMLInputElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	const scrollToBottom = () => {
+		if (containerRef.current) {
+			containerRef.current.scrollTop = containerRef.current.scrollHeight;
+		}
+	};
 
 	const handleSubmit = (actionType: 'message' | 'action') => {
 		const inputValue = textFieldRef.current?.value;
@@ -39,14 +54,23 @@ export function TextBox() {
 			};
 			setActions([...actions, action]);
 			textFieldRef.current.value = '';
+			setTimeout(() => scrollToBottom, 0);
 		}
 	};
 
+	useEffect(() => {
+		scrollToBottom();
+	}, [actions]);
+
 	return (
-		<Stack>
-			{actions.map((action) => (
-				<ActionBox action={action} />
-			))}
+		<Paper elevation={3}>
+			<Container ref={containerRef} className='container-chat'>
+				<Stack>
+					{actions.map((action) => (
+						<ActionBox action={action} />
+					))}
+				</Stack>
+			</Container>
 			<TextField
 				inputRef={textFieldRef}
 				onKeyDown={(e) => {
@@ -54,6 +78,8 @@ export function TextBox() {
 						handleSubmit('message');
 					}
 				}}
+				variant='standard'
+				fullWidth
 				InputProps={{
 					endAdornment: (
 						<IconButton onClick={() => handleSubmit('message')}>
@@ -61,7 +87,7 @@ export function TextBox() {
 						</IconButton>
 					),
 				}}
-			></TextField>
-		</Stack>
+			/>
+		</Paper>
 	);
 }
