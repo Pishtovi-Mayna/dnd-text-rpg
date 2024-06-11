@@ -8,6 +8,7 @@ import {
 	Typography,
 	Stack,
 } from '@mui/material';
+import Image from './dice.png';
 
 type CardProps = {
 	title: string;
@@ -17,7 +18,6 @@ type CardProps = {
 
 type CardListProps = {
 	type: 'campaign' | 'character';
-	items: Array<CardProps>;
 };
 
 function Card({ title, image, type }: CardProps) {
@@ -43,7 +43,7 @@ function Card({ title, image, type }: CardProps) {
 			</CardContent>
 			<CardActions>
 				<Button size='small'>
-					{type === 'campaign' ? 'Join' : 'Create'}
+					{type === 'campaign' ? 'Join' : 'Edit'}
 				</Button>
 				<Button size='small'>
 					{type === 'campaign' ? 'Leave' : 'Delete'}
@@ -53,19 +53,36 @@ function Card({ title, image, type }: CardProps) {
 	);
 }
 
-export function CardList({ items, type }: CardListProps) {
+export function CardList({ type }: CardListProps) {
+	const items = [
+		{
+			title: 'A title',
+			image: Image,
+		},
+		{
+			title: 'Another title',
+			image: Image,
+		},
+		{
+			title: 'Yet another title',
+			image: Image,
+		},
+	];
+
 	return (
 		<>
-			<Stack direction='row' justifyContent='space-between'>
+			<Stack direction='row' justifyContent='space-between' width='100%'>
 				<Typography variant='h4' fontWeight='500'>
-					Ongoing Campaigns
+					{type === 'campaign'
+						? 'Ongoing Campaigns'
+						: 'Current Characters'}
 				</Typography>
 				<Stack direction='row' spacing={2}>
 					<Button variant='outlined' endIcon={<Add />}>
 						Create {type}
 					</Button>
 					<Button variant='contained' endIcon={<ArrowRight />}>
-						Join {type}
+						{type === 'campaign' ? `Join ${type}` : `Add ${type}`}
 					</Button>
 				</Stack>
 			</Stack>
@@ -74,6 +91,8 @@ export function CardList({ items, type }: CardListProps) {
 					display: 'flex',
 					gap: '16px',
 					flexDirection: 'row',
+					width: '100%',
+					marginBottom: '2em',
 				}}
 			>
 				{items.map(({ title, image }) => {

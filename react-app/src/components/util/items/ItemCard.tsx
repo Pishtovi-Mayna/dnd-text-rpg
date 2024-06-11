@@ -3,7 +3,6 @@ import {
 	CardContent,
 	CardHeader,
 	CardMedia,
-	Divider,
 	Stack,
 	Typography,
 } from '@mui/material';
