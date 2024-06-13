@@ -4,6 +4,7 @@ import { HomePage } from './components/home/modules/logged-in/HomePage';
 import { Navbar } from './components/util/navbar/Navbar';
 import { User } from './components/user/User';
 import { NotLoggedIn } from './components/home/modules/not-logged-in/NotLoggedIn';
+import { AddCharacter } from './components/character/AddCharacter';
 
 const UserContext = createContext<User | null>(null);
 
@@ -21,10 +22,11 @@ function App() {
 	return (
 		<UserContext.Provider value={user}>
 			<div className='App'>
-				<Navbar />
+				{/* <Navbar /> */}
 				{/* <Login /> */}
 				{/* <Register /> */}
-				{user ? <HomePage /> : <NotLoggedIn />}
+				{/* {user ? <HomePage /> : <NotLoggedIn />} */}
+				<AddCharacter />
 			</div>
 		</UserContext.Provider>
 	);

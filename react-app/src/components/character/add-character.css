@@ -1,0 +1,15 @@
+.input-stack {
+	width: 100vw;
+	height: 100vh;
+	align-items: center;
+	justify-content: center;
+    gap: 1.5em;
+}
+
+.input-field { 
+    width: 16em;
+}
+
+.full-width {
+	width: 34em;
+}
