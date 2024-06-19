@@ -1,7 +1,11 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { TextField, InputAdornment, IconButton, Button } from '@mui/material';
 
-type PasswordProps = {
+type InputProps = {
+	ref: React.RefObject<HTMLDivElement>;
+};
+
+type PasswordProps = InputProps & {
 	label: string;
 	showPassword: boolean;
 	handleClick?: () => void;
@@ -9,11 +13,18 @@ type PasswordProps = {
 
 type SubmitButtonProps = {
 	label: string;
+	onClick: () => void;
 };
 
-export function UsernameField() {
+export function UsernameField({ ref }: InputProps) {
 	return (
-		<TextField id='username' label='Username' variant='filled' fullWidth />
+		<TextField
+			ref={ref}
+			id='username'
+			label='Username'
+			variant='filled'
+			fullWidth
+		/>
 	);
 }
 
@@ -41,10 +52,10 @@ export function PasswordField(props: PasswordProps) {
 	);
 }
 
-export function SubmitButton(props: SubmitButtonProps) {
+export function SubmitButton({ label, onClick }: SubmitButtonProps) {
 	return (
-		<Button type='submit' variant='contained' sx={{ height: '48px' }}>
-			{props.label}
+		<Button type='submit' variant='contained' sx={{ height: '48px' }} onClick={onClick}>
+			{label}
 		</Button>
 	);
 }

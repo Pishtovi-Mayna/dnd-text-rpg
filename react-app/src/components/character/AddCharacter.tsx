@@ -7,10 +7,50 @@ import {
 	Typography,
 } from '@mui/material';
 import './add-character.css';
-import { useEffect, useState } from 'react';
+import {
+	Dispatch,
+	SetStateAction,
+	createContext,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
+import axios from 'axios';
+
+interface Stat {
+	name: string;
+	value: number;
+}
+
+interface Spell {
+	name: string;
+	level: number;
+}
+
+interface Item {
+	name: string;
+	quantity: number;
+}
+
+interface Character {
+	name?: string;
+	maxHp?: number;
+	class?: string;
+	race?: string;
+	description?: string;
+
+	stats?: Stat[];
+	modifiedStats?: Stat[];
+	spells?: Spell[];
+	items?: Item[];
+}
+console.log('wut');
 
 type InputProps = {
 	changePage: (newPage: number, params: string[]) => void;
+	character?: Character;
+	setCharacter: Dispatch<SetStateAction<Character>>;
 };
 
 type ItemProps = InputProps & {
@@ -18,45 +58,101 @@ type ItemProps = InputProps & {
 	page: number;
 };
 
-export function AddCharacter() {
-	const [page, setPage] = useState(3);
+const CharacterContext = createContext<Character>({});
 
-	const changePage = (newPage: number, params: string[]) => {
+export function AddCharacter() {
+	const [page, setPage] = useState(1);
+	const [character, setCharacter] = useState<Character>({});
+
+	const changePage = (newPage: number) => {
 		setPage(newPage);
 	};
 
+	useEffect(() => console.log(character), [character]);
+
 	return (
-		<Stack className='input-stack'>
-			<Typography variant='h2' fontWeight='bold'>
-				Create Character
-			</Typography>
-			{page === 1 && <InfoInput changePage={changePage} />}
-			{page === 2 && <StatsInput changePage={setPage} />}
-			{page === 3 && <ModifiedStatsInput changePage={setPage} />}
-			{page === 4 && <SpellsInput changePage={setPage} />}
-		</Stack>
+		<CharacterContext.Provider value={character}>
+			<Stack className='input-stack'>
+				<Typography variant='h2' fontWeight='bold'>
+					Create Character
+				</Typography>
+				{page === 1 && (
+					<InfoInput
+						changePage={changePage}
+						character={character}
+						setCharacter={setCharacter}
+					/>
+				)}
+				{page === 2 && (
+					<StatsInput
+						changePage={setPage}
+						character={character}
+						setCharacter={setCharacter}
+					/>
+				)}
+				{page === 3 && (
+					<ModifiedStatsInput
+						changePage={setPage}
+						character={character}
+						setCharacter={setCharacter}
+					/>
+				)}
+				{page === 4 && (
+					<SpellsInput
+						changePage={setPage}
+						character={character}
+						setCharacter={setCharacter}
+					/>
+				)}
+				{page === 5 && (
+					<ItemsInput
+						changePage={setPage}
+						character={character}
+						setCharacter={setCharacter}
+					/>
+				)}
+			</Stack>
+		</CharacterContext.Provider>
 	);
 }
 
-const classes: Array<string> = ['Hi', 'Wassup', 'Hello', 'Why tho?'];
-const races: Array<string> = ['Hi', 'Wassup', 'Hello', 'Why tho?'];
+const classes: string[] = ['Hi', 'Wassup', 'Hello', 'Why tho?'];
+const races: string[] = ['Hi', 'Wassup', 'Hello', 'Why tho?'];
 
-function InfoInput({ changePage }: InputProps) {
+function InfoInput({ changePage, character, setCharacter }: InputProps) {
 	const inputs = [
 		<TextField
 			className='input-field'
 			label='Character Name'
 			name='name'
+			onChange={(e) => {
+				const changed = { ...character };
+				changed.name = e.currentTarget.value;
+				setCharacter(changed);
+			}}
 		/>,
 		<TextField
 			className='input-field'
 			type='number'
 			label='Maximum HP'
 			name='maxHp'
+			onChange={(e) => {
+				const changed = { ...character };
+				changed.maxHp = Number.parseInt(e.currentTarget.value);
+				setCharacter(changed);
+			}}
 		/>,
 		<Autocomplete
 			className='input-field'
 			options={classes}
+			onChange={(e) => {
+				const _class = e.currentTarget.textContent;
+				if (_class) {
+					const changed = { ...character };
+					changed.class = _class;
+					setCharacter(changed);
+				}
+			}}
 			renderInput={(params) => (
 				<TextField {...params} label='Class' name='class' />
 			)}
@@ -64,6 +160,14 @@ function InfoInput({ changePage }: InputProps) {
 		<Autocomplete
 			className='input-field'
 			options={races}
+			onChange={(e) => {
+				const race = e.currentTarget.textContent;
+				if (race) {
+					const changed = { ...character };
+					changed.race = race;
+					setCharacter(changed);
+				}
+			}}
 			renderInput={(params) => (
 				<TextField {...params} label='Race' name='race' />
 			)}
@@ -73,54 +177,287 @@ function InfoInput({ changePage }: InputProps) {
 			multiline
 			label='Character Description'
 			name='description'
+			onChange={(e) => {
+				const changed = { ...character };
+				changed.description = e.currentTarget.value;
+				setCharacter(changed);
+			}}
 		/>,
 	];
-	return <ItemInput inputs={inputs} page={1} changePage={changePage} />;
+	return (
+		<ItemInput
+			character={character}
+			setCharacter={setCharacter}
+			inputs={inputs}
+			page={1}
+			changePage={changePage}
+		/>
+	);
 }
 
-function StatsInput({ changePage }: InputProps) {
+function StatsInput({ changePage, character, setCharacter }: InputProps) {
 	const inputs = [
 		<TextField
 			className='input-field'
 			type='number'
 			label='Strength'
 			name='strength'
+			onChange={(e) => {
+				const strength: Stat = {
+					name: 'strength',
+					value: Number.parseInt(e.currentTarget.value),
+				};
+				const newStats: Stat[] = character?.stats
+					? character.stats
+					: [];
+				if (character?.stats) {
+					const oldStat = newStats.find(
+						(el) => el.name === strength.name
+					);
+					if (oldStat) {
+						newStats.splice(newStats.indexOf(oldStat), 1, strength);
+					} else {
+						newStats.push(strength);
+					}
+				} else {
+					newStats.push(strength);
+				}
+				const changed: Character = {
+					name: character?.name,
+					maxHp: character?.maxHp,
+					class: character?.class,
+					race: character?.race,
+					description: character?.description,
+
+					stats: newStats,
+					items: character?.items,
+					spells: character?.spells,
+				};
+				setCharacter(changed);
+			}}
 		/>,
 		<TextField
 			className='input-field'
 			type='number'
 			label='Dexterity'
 			name='dexterity'
+			onChange={(e) => {
+				const dexterity: Stat = {
+					name: 'dexterity',
+					value: Number.parseInt(e.currentTarget.value),
+				};
+				const newStats: Stat[] = character?.stats
+					? character.stats
+					: [];
+				if (character?.stats) {
+					const oldStat = newStats.find(
+						(el) => el.name === dexterity.name
+					);
+					if (oldStat) {
+						newStats.splice(
+							newStats.indexOf(oldStat),
+							1,
+							dexterity
+						);
+					} else {
+						newStats.push(dexterity);
+					}
+				}
+				const changed: Character = {
+					name: character?.name,
+					maxHp: character?.maxHp,
+					class: character?.class,
+					race: character?.race,
+					description: character?.description,
+
+					stats: newStats,
+					items: character?.items,
+					spells: character?.spells,
+				};
+				setCharacter(changed);
+			}}
 		/>,
 		<TextField
 			className='input-field'
 			type='number'
 			label='Constituion'
 			name='constituion'
+			onChange={(e) => {
+				const constituion: Stat = {
+					name: 'constituion',
+					value: Number.parseInt(e.currentTarget.value),
+				};
+				const newStats: Stat[] = character?.stats
+					? character.stats
+					: [];
+				if (character?.stats) {
+					const oldStat = newStats.find(
+						(el) => el.name === constituion.name
+					);
+					if (oldStat) {
+						newStats.splice(
+							newStats.indexOf(oldStat),
+							1,
+							constituion
+						);
+					} else {
+						newStats.push(constituion);
+					}
+				}
+				const changed: Character = {
+					name: character?.name,
+					maxHp: character?.maxHp,
+					class: character?.class,
+					race: character?.race,
+					description: character?.description,
+
+					stats: newStats,
+					items: character?.items,
+					spells: character?.spells,
+				};
+				setCharacter(changed);
+			}}
 		/>,
 		<TextField
 			className='input-field'
 			type='number'
 			label='Intelligence'
 			name='intelligence'
+			onChange={(e) => {
+				const intelligence: Stat = {
+					name: 'intelligence',
+					value: Number.parseInt(e.currentTarget.value),
+				};
+				const newStats: Stat[] = character?.stats
+					? character.stats
+					: [];
+				if (character?.stats) {
+					const oldStat = newStats.find(
+						(el) => el.name === intelligence.name
+					);
+					if (oldStat) {
+						newStats.splice(
+							newStats.indexOf(oldStat),
+							1,
+							intelligence
+						);
+					} else {
+						newStats.push(intelligence);
+					}
+				}
+				const changed: Character = {
+					name: character?.name,
+					maxHp: character?.maxHp,
+					class: character?.class,
+					race: character?.race,
+					description: character?.description,
+
+					stats: newStats,
+					items: character?.items,
+					spells: character?.spells,
+				};
+				setCharacter(changed);
+			}}
 		/>,
 		<TextField
 			className='input-field'
 			type='number'
 			label='Wisdom'
 			name='wisdom'
+			onChange={(e) => {
+				const wisdom: Stat = {
+					name: 'wisdom',
+					value: Number.parseInt(e.currentTarget.value),
+				};
+				const newStats: Stat[] = character?.stats
+					? character.stats
+					: [];
+				if (character?.stats) {
+					const oldStat = newStats.find(
+						(el) => el.name === wisdom.name
+					);
+					if (oldStat) {
+						newStats.splice(newStats.indexOf(oldStat), 1, wisdom);
+					} else {
+						newStats.push(wisdom);
+					}
+				}
+				const changed: Character = {
+					name: character?.name,
+					maxHp: character?.maxHp,
+					class: character?.class,
+					race: character?.race,
+					description: character?.description,
+
+					stats: newStats,
+					items: character?.items,
+					spells: character?.spells,
+				};
+				setCharacter(changed);
+			}}
 		/>,
 		<TextField
 			className='input-field'
 			type='number'
 			label='Charisma'
 			name='charisma'
+			onChange={(e) => {
+				const charisma: Stat = {
+					name: 'charisma',
+					value: Number.parseInt(e.currentTarget.value),
+				};
+				const newStats: Stat[] = character?.stats
+					? character.stats
+					: [];
+				if (character?.stats) {
+					const oldStat = newStats.find(
+						(el) => el.name === charisma.name
+					);
+					if (oldStat) {
+						newStats.splice(newStats.indexOf(oldStat), 1, charisma);
+					} else {
+						newStats.push(charisma);
+					}
+				}
+				const changed: Character = {
+					name: character?.name,
+					maxHp: character?.maxHp,
+					class: character?.class,
+					race: character?.race,
+					description: character?.description,
+
+					stats: newStats,
+					items: character?.items,
+					spells: character?.spells,
+				};
+				setCharacter(changed);
+			}}
 		/>,
 	];
-	return <ItemInput inputs={inputs} page={2} changePage={changePage} />;
+	return (
+		<ItemInput
+			character={character}
+			setCharacter={setCharacter}
+			inputs={inputs}
+			page={2}
+			changePage={changePage}
+		/>
+	);
 }
 
 function ItemInput({ inputs, page, changePage }: ItemProps) {
+	const character = useContext(CharacterContext);
+
+	function handleAddCharacter() {
+		axios
+			.post('http://localhost:4000/characters', { character })
+			.then((res) => {
+				console.log(character);
+				console.log(res);
+				console.log(res.data);
+			});
+	}
+
 	return (
 		<Grid container spacing={4} width='36em'>
 			{inputs.map((input) => (
@@ -128,7 +465,7 @@ function ItemInput({ inputs, page, changePage }: ItemProps) {
 					{input}
 				</Grid>
 			))}
-			{page > 1 ? (
+			{page > 1 && page < 5 && (
 				<Grid item xs={4}>
 					<Button
 						variant='contained'
@@ -137,11 +474,9 @@ function ItemInput({ inputs, page, changePage }: ItemProps) {
 						Previous step
 					</Button>
 				</Grid>
-			) : (
-				<></>
 			)}
 			{page > 1 ? <Grid item xs={5} /> : <Grid item xs={9} />}
-			{page > 0 ? (
+			{page < 5 && (
 				<Grid item xs={3}>
 					<Button
 						variant='contained'
@@ -150,24 +485,32 @@ function ItemInput({ inputs, page, changePage }: ItemProps) {
 						Next step
 					</Button>
 				</Grid>
-			) : (
-				<></>
+			)}
+			{page === 5 && (
+				<>
+					<Grid item xs={8} />
+					<Grid item xs={4}>
+						<Button
+							variant='contained'
+							onClick={() => handleAddCharacter()}
+						>
+							Add Character
+						</Button>
+					</Grid>
+				</>
 			)}
 		</Grid>
 	);
 }
 
-function ModifiedStatsInput({ changePage }: InputProps) {
-	interface Stats {
-		name: string;
-		value: number;
-	}
-
+function ModifiedStatsInput({
+	changePage,
+	character,
+	setCharacter,
+}: InputProps) {
 	//TODO: get actual stats
-	const [stats, setStats] = useState<Array<Stats>>([
-		{ name: 'Hi', value: 24 },
-	]);
-	const [modifiedStats, setModifiedStats] = useState<Stats[]>([]);
+	const [stats, setStats] = useState<Stat[]>([{ name: 'Hi', value: 24 }]);
+	const [modifiedStats, setModifiedStats] = useState<Stat[]>([]);
 	const [isValid, setIsValid] = useState(true);
 	const [inputs, setInputs] = useState<JSX.Element[]>([]);
 
@@ -181,14 +524,26 @@ function ModifiedStatsInput({ changePage }: InputProps) {
 					disabled
 					value={el.name}
 					name={el.name}
+					onLoad={(e) => {
+						const changed = { ...character };
+						const name = el.name;
+						changed.stats?.push({ name: name, value: 0 });
+					}}
 				/>,
 				<TextField
 					className='input-field'
 					type='number'
 					name={`${el.name}-value`}
-					onChange={(e) =>
-						(el.value = Number.parseInt(e.currentTarget.value))
-					}
+					onChange={(e) => {
+						const value = Number.parseInt(e.currentTarget.value);
+						const index = modifiedStats.indexOf(el);
+						el.value = value;
+						const statsTemp = [...modifiedStats];
+						statsTemp.splice(index, 1, el);
+						const characterTemp = { ...character };
+						characterTemp.modifiedStats = statsTemp;
+						setCharacter(characterTemp);
+					}}
 				/>,
 			]);
 		}
@@ -211,44 +566,47 @@ function ModifiedStatsInput({ changePage }: InputProps) {
 									e.currentTarget.lastChild
 										?.firstChild as HTMLInputElement
 								).value;
-								if (stats.find((el) => el.name === name)) {
-									if (
-										modifiedStats.find(
-											(el) => el.name === name
-										)
-									) {
-										setIsValid(false);
+								if (name) {
+									if (stats.find((el) => el.name === name)) {
+										if (
+											modifiedStats.find(
+												(el) => el.name === name
+											)
+										) {
+											setIsValid(false);
+										} else {
+											setModifiedStats([
+												...modifiedStats,
+												//TODO: get corrent value from server
+												{ name: name, value: 0 },
+											]);
+											setIsValid(true);
+										}
 									} else {
-										setModifiedStats([
-											...modifiedStats,
-											//TODO: get corrent value from server
-											{ name: name, value: 0 },
-										]);
-										setIsValid(true);
+										setIsValid(false);
 									}
-								} else {
-									setIsValid(false);
 								}
 							}
 						}}
 					/>
 				)}
 			/>
-			<ItemInput inputs={inputs} page={3} changePage={changePage} />
+			<ItemInput
+				character={character}
+				setCharacter={setCharacter}
+				inputs={inputs}
+				page={3}
+				changePage={changePage}
+			/>
 		</>
 	);
 }
 
-function SpellsInput({ changePage }: InputProps) {
-	interface Spell {
-		name: string;
-		level: number;
-	}
-
+function SpellsInput({ changePage, character, setCharacter }: InputProps) {
 	const [isValid, setIsValid] = useState(true);
 	const [inputs, setInputs] = useState<JSX.Element[]>([]);
-	const allSpells: Array<string> = ['Spell 1', 'Spell 2'];
-	const [spells, setSpells] = useState<Array<Spell>>([]);
+	const allSpells: string[] = ['Something', 'Other'];
+	const [spells, setSpells] = useState<Spell[]>([]);
 
 	useEffect(() => {
 		const el = spells[spells.length - 1];
@@ -265,9 +623,15 @@ function SpellsInput({ changePage }: InputProps) {
 					className='input-field'
 					type='number'
 					name={`${el.name}-level`}
-					onChange={(e) =>
-						(el.level = Number.parseInt(e.currentTarget.value))
-					}
+					onChange={(e) => {
+						const changed = { ...character };
+						const index = spells.indexOf(el);
+						el.level = Number.parseInt(e.currentTarget.value);
+						const spellsTemp = [...spells];
+						spellsTemp.splice(index, 1, el);
+						changed.spells = spellsTemp;
+						setCharacter(changed);
+					}}
 				/>,
 			]);
 		}
@@ -290,36 +654,43 @@ function SpellsInput({ changePage }: InputProps) {
 									e.currentTarget.lastChild
 										?.firstChild as HTMLInputElement
 								).value;
-								if (allSpells.find((el) => el === name)) {
-									if (spells.find((el) => el.name === name)) {
-										setIsValid(false);
+								if (name) {
+									if (allSpells.find((el) => el === name)) {
+										if (
+											spells.find(
+												(el) => el.name === name
+											)
+										) {
+											setIsValid(false);
+										} else {
+											setSpells([
+												...spells,
+												//TODO: get corrent level from server
+												{ name: name, level: 1 },
+											]);
+											setIsValid(true);
+										}
 									} else {
-										setSpells([
-											...spells,
-											//TODO: get corrent level from server
-											{ name: name, level: 1 },
-										]);
-										setIsValid(true);
+										setIsValid(false);
 									}
-								} else {
-									setIsValid(false);
 								}
 							}
 						}}
 					/>
 				)}
 			/>
-			<ItemInput inputs={inputs} page={4} changePage={changePage} />
+			<ItemInput
+				character={character}
+				setCharacter={setCharacter}
+				inputs={inputs}
+				page={4}
+				changePage={changePage}
+			/>
 		</>
 	);
 }
 
-function ItemsInput({ changePage }: InputProps) {
-	interface Item {
-		name: string;
-		quantity: number;
-	}
-
+function ItemsInput({ changePage, character, setCharacter }: InputProps) {
 	const [isValid, setIsValid] = useState(true);
 	const [inputs, setInputs] = useState<JSX.Element[]>([]);
 	const [items, setItems] = useState<Array<Item>>([]);
@@ -339,9 +710,15 @@ function ItemsInput({ changePage }: InputProps) {
 					className='input-field'
 					type='number'
 					name={`${el.name}-level`}
-					onChange={(e) =>
-						(el.quantity = Number.parseInt(e.currentTarget.value))
-					}
+					onChange={(e) => {
+						const index = items.indexOf(el);
+						el.quantity = Number.parseInt(e.currentTarget.value);
+						const itemsTemp = [...items];
+						items.splice(index, 1, el);
+						const changed = { ...character };
+						changed.items = itemsTemp;
+						setCharacter(changed);
+					}}
 				/>,
 			]);
 		}
@@ -362,12 +739,25 @@ function ItemsInput({ changePage }: InputProps) {
 						if (items.find((el) => el.name === name)) {
 							setIsValid(false);
 						} else {
-							setIsValid(true);
+							if (name) {
+								const toBeAdded = {
+									name: name,
+									quantity: 0,
+								};
+								setItems([...items, toBeAdded]);
+								setIsValid(true);
+							}
 						}
 					}
 				}}
 			/>
-			<ItemInput inputs={inputs} page={4} changePage={changePage} />
+			<ItemInput
+				character={character}
+				setCharacter={setCharacter}
+				inputs={inputs}
+				page={5}
+				changePage={changePage}
+			/>
 		</>
 	);
 }
