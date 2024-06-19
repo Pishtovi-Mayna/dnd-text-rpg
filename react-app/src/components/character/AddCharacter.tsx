@@ -452,9 +452,7 @@ function ItemInput({ inputs, page, changePage }: ItemProps) {
 		axios
 			.post('http://localhost:4000/characters', { character })
 			.then((res) => {
-				console.log(character);
-				console.log(res);
-				console.log(res.data);
+				//handleResponse
 			});
 	}
 

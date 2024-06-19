@@ -5,6 +5,8 @@ import { Navbar } from './components/util/navbar/Navbar';
 import { User } from './components/user/User';
 import { NotLoggedIn } from './components/home/modules/not-logged-in/NotLoggedIn';
 import { AddCharacter } from './components/character/AddCharacter';
+import { Register } from './components/user/register/RegisterPage';
+import { Login } from './components/user/login/LoginPage';
 
 const UserContext = createContext<User | null>(null);
 
@@ -23,10 +25,10 @@ function App() {
 		<UserContext.Provider value={user}>
 			<div className='App'>
 				{/* <Navbar /> */}
-				{/* <Login /> */}
+				<Login />
 				{/* <Register /> */}
 				{/* {user ? <HomePage /> : <NotLoggedIn />} */}
-				<AddCharacter />
+				{/* <AddCharacter /> */}
 			</div>
 		</UserContext.Provider>
 	);

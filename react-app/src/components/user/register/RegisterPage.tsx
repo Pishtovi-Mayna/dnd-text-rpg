@@ -6,22 +6,37 @@ import axios from 'axios';
 
 export function Register() {
 	const [showPassword, setShowPassword] = useState(false);
+	const [passwordsMatch, setPasswordsMatch] = useState(true);
 	const usernameRef = useRef<HTMLDivElement>(null);
 	const passwordRef = useRef<HTMLDivElement>(null);
 	const confirmPasswordRef = useRef<HTMLDivElement>(null);
 
 	const handleRegister = () => {
+		const username = (
+			usernameRef.current?.lastChild?.firstChild as HTMLInputElement
+		).value;
+		const password = (
+			passwordRef.current?.lastChild?.firstChild as HTMLInputElement
+		).value;
+		const confirmPassword = (
+			confirmPasswordRef.current?.lastChild
+				?.firstChild as HTMLInputElement
+		).value;
 
-		console.log(usernameRef.current);
-		console.log(passwordRef.current);
-		console.log(confirmPasswordRef.current);
+		if (password !== confirmPassword) {
+			setPasswordsMatch(false);
+		} else {
+			setPasswordsMatch(true);
+		}
 
-		// const user = {
-		// 	username: usernameRef.current?.firstChild?
-		// }
+		const user = {
+			username: username,
+			password: password,
+		};
 
-		// axios.post("http://localhost:4000/users", { user })
-		// .then();
+		axios.post('http://localhost:4000/users', { user }).then((res) => {
+			console.log(res);
+		});
 	};
 
 	return (
@@ -33,14 +48,16 @@ export function Register() {
 					showPassword={showPassword}
 					handleClick={() => setShowPassword(!showPassword)}
 					label='Password'
+					passwordsMatch={passwordsMatch}
 				/>
 				<PasswordField
 					ref={confirmPasswordRef}
 					showPassword={showPassword}
 					handleClick={() => setShowPassword(!showPassword)}
 					label='Confirm Password'
+					passwordsMatch={passwordsMatch}
 				/>
-				<SubmitButton label='Register' onClick={handleRegister} />
+				<SubmitButton label='Register' handleClick={handleRegister} />
 			</Stack>
 		</div>
 	);
